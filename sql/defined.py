@@ -47,7 +47,13 @@ def query_sales_list(
         list_sql += f" LIMIT {skipCount or 0}, {listCount}"
 
     rows = query_data(list_sql, params)
-    return rows
+    if rows is None:
+        return [], []
+    
+    data = []
+    for row in rows:
+        data.append([row["sales_id"], row["item_id"], row["buyer_id"], row["quantity"], row["discount"], row["total_amount"], row["sales_at"].strftime("%Y-%m-%d %H:%M:%S"), row["user_name"], row["item_name"], row["price"], row["seller_name"]])
+    return data, ["ID", "상품 ID", "구매자 ID", "수량", "할인금액", "총금액", "판매일시", "구매자명", "상품명", "상품가격", "판매자명"]
 
 
 def query_sales_group_by_date(

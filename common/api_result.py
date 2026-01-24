@@ -20,6 +20,7 @@ class ApiResult(BaseModel, Generic[T]):
     reason: str = ""
     message: str = ""
     data: Optional[T] = None
+    columns: list[str] = []
     count: int = 0
 
     model_config = ConfigDict(arbitrary_types_allowed=True)

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+  <h1>한국어로 데이터 조회</h1>
+  <div>
+    <form action="/sql" method="post">
+      <label for="query">질문을 입력하세요:</label><br>
+      <input type="text" id="queryTxt" name="queryTxt" size="100"><br><br>
+      <input type="submit" value="자연어로 조회">
+      <input type="button" value="기본 조회" onclick="fetchSalesList()" />
+    </form>
+  </div>
+  <div>
+    <table></table>
+  </div>
+  <script>
+    const form = document.querySelector('form');
+    const table = document.querySelector('table');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+
+      const response = await fetch('/api/ml2sql/llm', {
+        method: 'POST',
+        body: formData.get('queryTxt')
+      });
+      const result = await response.json();
+      
+      // Clear previous table content
+      table.innerHTML = '';
+
+      if (result.columns && result.data) {
+        buildTable(result.columns, result.data);
+      } else if (result.error) {
+        table.innerHTML = `<tr><td colspan="100%">${result.error}</td></tr>`;
+      }
+    });
+
+    const fetchSalesList = async () => {
+      const response = await fetch('/api/ml2sql');
+      const result = await response.json();
+      
+      // Clear previous table content
+      table.innerHTML = '';
+
+      if (result.columns && result.data) {
+        buildTable(result.columns, result.data);
+      }
+    }
+
+    const buildTable = (columns, data) => {
+      // Create table header
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      columns.forEach(col => {
+        const th = document.createElement('th');
+          th.textContent = col;
+          headerRow.appendChild(th);
+        });
+
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      // Create table body
+      const tbody = document.createElement('tbody');
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+          row.forEach(cell => {
+            const td = document.createElement('td');
+            td.textContent = cell;
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+    //   } else if (result.error) {
+    //     table.innerHTML = `<tr><td colspan="100%">${result.error}</td></tr>`;
+    //   }
+    }
+    
+  </script>
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</body>
+</html>

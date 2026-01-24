@@ -21,7 +21,7 @@ async def get_sales_list(
 ) -> ApiResult[list[dict]]:
     try:
         api_result = ApiResult[dict]()
-        api_result.data = fixed_dao.query_sales_list(
+        api_result.data, api_result.columns = fixed_dao.query_sales_list(
             buyerId=buyerId,
             itemId=itemId,
             sellerId=sellerId,
@@ -57,6 +57,20 @@ async def get_sales_group_by_date(
         )
     except Exception as e:
         print("get_sales_list Exception", e)
+        api_result.status = ResultStatus.ERROR
+        api_result.reason = "Exception"
+        api_result.message = str(e)
+    return api_result
+
+
+@router.post("/llm", response_model=ApiResult[dict])
+async def get_by_llm(text: Optional[str]) -> ApiResult[dict]:
+    try:
+        api_result = ApiResult[dict]()
+        fixed_dao.reset_db()
+        api_result.data = {"result": "ok"}
+    except Exception as e:
+        print("reset_db Exception", e)
         api_result.status = ResultStatus.ERROR
         api_result.reason = "Exception"
         api_result.message = str(e)
